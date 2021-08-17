@@ -43,7 +43,7 @@ when(t
   lmgrCreateMenuItem("csynCheckIn" "simple"
     '(
       ("label" "Check In")
-      ("callback" ("csynLMCBCheckOut" "noOpts"))
+      ("callback" ("csynLMCBCheckIn" "noOpts"))
     )
   )
   lmgrCreateMenuItem("csynCancelCo" "simple"
@@ -53,7 +53,7 @@ when(t
     )
   )
 
-  lmgrInsertMenuItems("editCheckOutButton" "LCVlcv"
+  lmgrInsertMenuItems("editCheckOutButton" "CVcv"
     '("csynCheckIn" "csynCheckOut" "csynCancelCo")
   ) 
 )
