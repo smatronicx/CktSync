@@ -1,8 +1,7 @@
 ;----------------
 ; This file is part of CktSync design manager
 ;----------------
-;when(getShellEnvVar("CKTSYNC_DIR") && getShellEnvVar("CKTSYNC_LM_MENU")
-when(t
+when(getShellEnvVar("CKTSYNC_DIR")
 
   ;Remove existing Design Manager
   lmgrManageMenuItems(
