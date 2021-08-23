@@ -5,11 +5,14 @@
 import sys
 import getpass
 
+import cktsync
+
 # Class for CDS client
 class CDSClient():
   # Initialize
   def __init__(self):
     self.user = getpass.getuser()
+    self.csynclient = cktsync.CktSyncClient()
     
   # Start cds client
   def Start(self):
@@ -21,6 +24,7 @@ class CDSClient():
     # Read requrest from skill
     pkt = sys.stdin.readline()
     pkt = '{}: {}'.format(self.user, pkt)
+    pkt = self.csynclient.SendCommand(pkt)
     self.WritePacket(pkt)
   
   # Write packet
