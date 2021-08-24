@@ -3,17 +3,28 @@
 #----------------
 
 import os
+import argparse
+import getpass
 from multiprocessing.connection import Listener
+from .csyn_config import CktSyncConfig
 
-# Class for CktSync Client
+# Class for CktSync Server
 class CktSyncServer():
   # Initialize
   def __init__(self):
-    # Need server ip and port to start client
-    self.server_ip = os.environ.get("CKTSYNC_SERVER")
-    self.server_port = os.environ.get("CKTSYNC_PORT")
+    # Need installation path
+    self.csyn_dir = os.environ.get("CKTSYNC_DIR")
+    if(self.csyn_dir is None):
+      raise ValueError('CKTSYNC_DIR is not defined.')
+    
+    # Read config file
+    csynconfig = CktSyncConfig()
+    cfgpath = os.path.join(self.csyn_dir,"config","cktsync.cfg")
+    csynconfig.Read(cfgpath)
+    self.server_ip = csynconfig.get("server", "ip")
+    self.server_port = csynconfig.get("server", "port")
     if(self.server_ip is None or self.server_port is None):
-      raise ValueError('CKTSYNC_SERVER or CKTSYNC_PORT is not defined.')
+      raise ValueError('Server or port is not defined in {}.'.format(cfgpath))
     
     self.server_port = int(self.server_port)
      
@@ -31,5 +42,16 @@ class CktSyncServer():
   # Parse command
   def ParseCommand(self, cmd):
     return 'srv:{}'.format(cmd)
-
-CktSyncServer().Start()
+  
+  # Arg parser
+  def ArgParser(self, args):
+    parser = argparse.ArgumentParser(prog="cktsync server")
+    parser.add_argument("password", help="Password for SVN")
+    parser_result = parser.parse_args(args)
+    
+    # Set credential
+    self.username = getpass.getuser()
+    self.password = parser_result.password
+    
+    # Start server
+    self.Start()
