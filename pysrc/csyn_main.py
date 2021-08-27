@@ -20,27 +20,31 @@ def print_help():
 
 # Wrap arser to catch errors
 def safe_parser():
-  # Parse argument 
-  if(len(sys.argv) < 2):
-    # No arguments provided
+  subcmd = sys.argv[1]
+  # Start server
+  if(subcmd == "server"):
+    cktsync.CktSyncServer().ArgParser(sys.argv[2:])
+
+  # Project manager
+  elif(subcmd == "project"):
+    cktsync.CktSyncProject().ArgParser(sys.argv[2:])
+
+  # Print help
+  else:
     print_help()
 
+# Parse argument 
+if(len(sys.argv) < 2):
+  # No arguments provided
+  print_help()
+else:
+  # Catch all expections
+  if(sys.argv[1] != '--debug'):
+    try:
+      safe_parser()
+    except Exception as e:
+      print('-E- {}'.format(e))
   else:
-    subcmd = sys.argv[1]
-    # Start server
-    if(subcmd == "server"):
-      cktsync.CktSyncServer().ArgParser(sys.argv[2:])
-
-    # Project manager
-    elif(subcmd == "project"):
-      cktsync.CktSyncProject().ArgParser(sys.argv[2:])
-
-    # Print help
-    else:
-      print_help()
- 
-# Catch all expections
-try:
-  safe_parser()
-except Exception as e:
-  print(e)
+  # Debug
+    sys.argv.remove('--debug')
+    safe_parser()

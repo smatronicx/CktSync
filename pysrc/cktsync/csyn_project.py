@@ -10,7 +10,8 @@ from .csyn_config import CktSyncConfig
 class CktSyncProject():
   # Initialize
   def __init__(self):
-    pass
+    # Create config file
+    self.config = CktSyncConfig()
     
   # Init Project
   def InitProject(self):
@@ -30,9 +31,8 @@ class CktSyncProject():
       print('Unable to initialize project in {}'.format(projdir))
     
     # Create config file
-    config = CktSyncConfig()
-    config.set('core','type','project')
-    config.Write(config_file)
+    self.config.set('core','type','project')
+    self.WriteConfig()
   
   # Read current config file
   def ReadConfig(self):
@@ -45,12 +45,57 @@ class CktSyncProject():
     
     
     # Read config file
-    self.config = CktSyncConfig()
     self.config.Read(config_file)
+  
+  # Write current config file
+  def WriteConfig(self):
+    # Write to .csync/config file exists
+    projdir = os.getcwd()
+    csync_dir = os.path.join(projdir, '.csync')
+    config_file = os.path.join(csync_dir, 'config')
+    self.config.Write(config_file)
     
+  # Find project root dir
+  def FindProjectRoot(self):
+    startdir = os.getcwd()
+    while(True):
+      projdir = os.getcwd()
+      csync_dir = os.path.join(projdir, '.csync')
+      config_file = os.path.join(csync_dir, 'config')
+      config = CktSyncConfig()
+      try:
+        # Check if current dir is project root
+        config.Read(config_file)
+        dir_type = config.get('core', 'type')
+	
+	
+	# Found project path, return
+        if(dir_type is not None and dir_type == 'project'):
+          return
+      except:
+        pass
+      
+      # Move to upper folder
+      try:
+        os.chdir(os.path.pardir)
+	# Check for root
+        if(projdir == os.getcwd()):
+          break
+      except:
+        break
+	
+    # Not in project folder
+    raise ValueError('{} is not under any project.'.format(startdir))
+  
   # Configure project
   def ConfigProject(self, args):
+    self.FindProjectRoot()
     self.ReadConfig()
+    # Update config
+    if('repo' in args):
+      self.config.set('svn', 'repo', args.repo)
+    
+    self.WriteConfig()
     
   # Arg parser
   def ArgParser(self, args):
@@ -75,6 +120,10 @@ class CktSyncProject():
         parser_config.print_help()
       else:
         self.ConfigProject(parser_result)
+    
+    # Populate
+    elif(parser_result.subcmd == 'populate'):
+      self.PopulateProject()
     
     # Print help
     else:
