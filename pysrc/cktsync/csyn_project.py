@@ -5,6 +5,8 @@
 import os
 import argparse
 from .csyn_config import CktSyncConfig
+from . import csyn_util as CktSyncUtil
+from .csyn_svn import CktSyncSvn
 
 # Class for CktSync Project manager
 class CktSyncProject():
@@ -55,47 +57,38 @@ class CktSyncProject():
     config_file = os.path.join(csync_dir, 'config')
     self.config.Write(config_file)
     
-  # Find project root dir
-  def FindProjectRoot(self):
-    startdir = os.getcwd()
-    while(True):
-      projdir = os.getcwd()
-      csync_dir = os.path.join(projdir, '.csync')
-      config_file = os.path.join(csync_dir, 'config')
-      config = CktSyncConfig()
-      try:
-        # Check if current dir is project root
-        config.Read(config_file)
-        dir_type = config.get('core', 'type')
-	
-	
-	# Found project path, return
-        if(dir_type is not None and dir_type == 'project'):
-          return
-      except:
-        pass
-      
-      # Move to upper folder
-      try:
-        os.chdir(os.path.pardir)
-	# Check for root
-        if(projdir == os.getcwd()):
-          break
-      except:
-        break
-	
-    # Not in project folder
-    raise ValueError('{} is not under any project.'.format(startdir))
-  
   # Configure project
   def ConfigProject(self, args):
-    self.FindProjectRoot()
+    startdir = os.getcwd()
+    try:
+      CktSyncUtil.FindTypeRoot('project')
+    except:
+      raise ValueError('{} is not under any project.'.format(startdir))
+      
     self.ReadConfig()
     # Update config
     if('repo' in args):
       self.config.set('svn', 'repo', args.repo)
     
     self.WriteConfig()
+  
+  # Populate project
+  def PopulateProject(self):
+    # Move to pject root
+    startdir = os.getcwd()
+    try:
+      CktSyncUtil.FindTypeRoot('project')
+    except:
+      raise ValueError('{} is not under any project.'.format(startdir))
+      
+    self.ReadConfig()
+    repo = self.config.get('svn', 'repo')
+    if(repo is None):
+      raise ValueError('repo is not set for project.')
+    
+    projrepo = CktSyncSvn(repo, '', '')
+    projrepo.Checkout(repo)
+    projrepo.Update()
     
   # Arg parser
   def ArgParser(self, args):
@@ -108,6 +101,9 @@ class CktSyncProject():
     parser_config = subparsers.add_parser('config', 
       help='Configure project')
     parser_config.add_argument('--repo', help='Path to svn repo')
+    
+    parser_populate = subparsers.add_parser('populate', 
+      help='Populate project folder')
     
     parser_result = parser.parse_args(args)
     # Init

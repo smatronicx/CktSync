@@ -18,10 +18,3 @@ procedure(csynPopup(menuName libName cellName viewName fileName catName)
   )
   
 )
-
-;----------------
-; Procedure to checkout a cellviews
-;----------------
-procedure(csynLMCBCheckOut(menuName libName cellName viewName fileName catName)
-  printf("%s,%s,%s,%s,%s" libName cellName viewName fileName catName)
-)

@@ -67,3 +67,17 @@ class CktSyncSvn():
     cmd.extend(['info', item])
     cmdout = self.CommandExec(cmd)
     return cmdout
+  
+  # Checkout
+  def Checkout(self, item):
+    cmd = self.svn_base.copy()
+    cmd.extend(['checkout', item, '.'])
+    cmdout = self.CommandExec(cmd)
+    return cmdout
+  
+  # Update
+  def Update(self):
+    cmd = self.svn_base.copy()
+    cmd.extend(['update'])
+    cmdout = self.CommandExec(cmd)
+    return cmdout

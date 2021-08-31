@@ -61,6 +61,8 @@ procedure(csynGetResponse(@key (timeOut 30))
     else
       error("CktSync Client is not running") 
     )
+    ; Remove trailing \n
+    responseVal = substring(responseVal 1 length(responseVal)-1)
     responseVal
   )
 )

@@ -27,6 +27,9 @@ class CktSyncServer():
       raise ValueError('Server or port is not defined in {}.'.format(cfgpath))
     
     self.server_port = int(self.server_port)
+    
+    # Verbose
+    self.verbose = False
      
   # Start Server
   def Start(self):
@@ -37,6 +40,11 @@ class CktSyncServer():
       cmd = csynclient.recv()
       resp = self.ParseCommand(cmd) 
       csynclient.send(resp)
+      if(self.verbose):
+        print('Client : {}'.format(csynclient))
+        print('Req : {}'.format(cmd))
+        print('Resp : {}'.format(resp))
+	
       csynclient.close()
   
   # Parse command
@@ -47,11 +55,16 @@ class CktSyncServer():
   def ArgParser(self, args):
     parser = argparse.ArgumentParser(prog="cktsync server")
     parser.add_argument("password", help="Password for SVN")
+    parser.add_argument('--verbose', action='store_true', help='Print output from client')
+    
     parser_result = parser.parse_args(args)
     
     # Set credential
     self.username = getpass.getuser()
     self.password = parser_result.password
+    
+    if(parser_result.verbose):
+      self.verbose = True
     
     # Start server
     self.Start()

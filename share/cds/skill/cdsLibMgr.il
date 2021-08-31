@@ -8,7 +8,7 @@ when(getShellEnvVar("CKTSYNC_DIR")
     '(
       "editDeleteButton"
       "editDeleteViewButton"
-      "FileNewCVButton"
+      ;"FileNewCVButton"
       "editCheckInButton"
       "editCheckOutButton"
       "editCancelCheckOutButton"
@@ -47,7 +47,7 @@ when(getShellEnvVar("CKTSYNC_DIR")
   )
   lmgrCreateMenuItem("csynCancelCo" "simple"
     '(
-      ("label" "Check In")
+      ("label" "Cancel Checkout")
       ("callback" ("csynLMCBCancelCo" "noOpts"))
     )
   )

@@ -39,7 +39,7 @@ if(len(sys.argv) < 2):
   print_help()
 else:
   # Catch all expections
-  if(sys.argv[1] != '--debug'):
+  if('--debug' not in sys.argv):
     try:
       safe_parser()
     except Exception as e:
