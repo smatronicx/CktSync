@@ -40,4 +40,8 @@ class CktSyncConfig():
   # Add section
   def add(self, section):
     self.configs.add_section(section)
+  
+  # Remove section
+  def remove(self, section):
+    self.configs.remove_section(section)
     

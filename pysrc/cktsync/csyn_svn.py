@@ -29,7 +29,7 @@ class CktSyncSvn():
   # Add item to svn
   def Add(self, item):
     cmd = self.svn_base.copy()
-    cmd.extend(['add', '--parent', item])
+    cmd.extend(['add', '--parents', '--force', item])
     cmdout = self.CommandExec(cmd)
     return cmdout
   
@@ -44,6 +44,14 @@ class CktSyncSvn():
   def Commit(self, msg):
     cmd = self.svn_base.copy()
     cmd.extend(['commit', '-m', msg])
+    cmdout = self.CommandExec(cmd)
+    return cmdout
+  
+  # Commit item to repo
+  def CommitItem(self, msg, item):
+    cmd = self.svn_base.copy()
+    cmd.extend(['commit', '-m', msg])
+    cmd.extend(item)
     cmdout = self.CommandExec(cmd)
     return cmdout
  
@@ -81,3 +89,21 @@ class CktSyncSvn():
     cmd.extend(['update'])
     cmdout = self.CommandExec(cmd)
     return cmdout
+  
+  # Info to dictionary
+  def InfoDict(self, item):
+    cmdout = self.Info(item)
+    # Get the lines for dictionary
+    dictlines = cmdout.stdout.decode('utf-8').split('\n')
+    rtndict = {}
+    for dictline in dictlines:
+      # Find lines with key-value
+      if(dictline.find(':') != -1):
+        kvtokens = dictline.split(':')
+        key = kvtokens[0].strip()
+        value = ':'.join(kvtokens[1:]).strip()
+        rtndict[key] = value
+    
+    # Return the key-values
+    return rtndict
+	
