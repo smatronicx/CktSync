@@ -40,7 +40,7 @@ csynPrintVersion()
 ;----------------
 csynSourceFiles = '(
   "csynLM.il" "csynConnect.il" "csynCheckIn.il"
-  "csynCSV.il"
+  "csynCSV.il" "csynCheckOut.il"
 )
 
 procedure(csynLoadSourceFiles()

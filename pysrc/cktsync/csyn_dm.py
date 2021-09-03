@@ -252,7 +252,8 @@ class CktSyncDM():
       self.RemoveCVLockOwner(libpath, cellname, cellview)
       cellpath = os.path.join(libpath, cellname, '*')
       cellpaths = glob.glob(cellpath)
-      ci_item = []
+      cvpath = os.path.join(libpath, cellname)
+      ci_item = [cvpath]
       for pathitem in cellpaths:
         if(os.path.isfile(pathitem)):
           self.svnifc.Add(pathitem)

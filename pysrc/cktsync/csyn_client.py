@@ -34,10 +34,12 @@ class CktSyncClient():
       csynclient = Client(server_address)
     except:
       # Send error
-      resp = "1,No server running at {}:{}\n".format(self.server_ip, self.server_port)
-      return resp
+      resp_dict = {}
+      resp_dict['errcode'] = 1
+      resp_dict['msg'] = "No server running at {}:{}\n".format(self.server_ip, self.server_port)
+      return resp_dict
       
     csynclient.send(cmd)
-    resp = csynclient.recv()
+    resp_dict = csynclient.recv()
     csynclient.close()
-    return "0,{}".format(resp)
+    return resp_dict

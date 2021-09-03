@@ -77,7 +77,7 @@ procedure(csynSendCommand(csynCmd)
       csynPurge(csynClientPID)
       ipcWriteProcess(csynClientPID csynCmd)
     else
-      error("CktSync Client is not running") 
+      ; error("CktSync Client is not running")
     )
   )
 )
