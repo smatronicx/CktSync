@@ -3,56 +3,56 @@
 ;----------------
 when(getShellEnvVar("CKTSYNC_DIR")
 
-  ;Remove existing Design Manager
-  lmgrManageMenuItems(
+    ;Remove existing Design Manager
+    lmgrManageMenuItems(
     '(
-      "editDeleteButton"
-      "editDeleteViewButton"
-      ;"FileNewCVButton"
-      "editCheckInButton"
-      "editCheckOutButton"
-      "editCancelCheckOutButton"
-      "workAreaUpdateButton"
-      "submitButton"
-      "smallUpdateButton"
-      "submitSeparator"
-      "workAreaSeparator"
-      "dmPropertyCascade"
-      "designSeparator2"
-      "designSeparator1"
+        "editDeleteButton"
+        "editDeleteViewButton"
+        ;"FileNewCVButton"
+        "editCheckInButton"
+        "editCheckOutButton"
+        "editCancelCheckOutButton"
+        "workAreaUpdateButton"
+        "submitButton"
+        "smallUpdateButton"
+        "submitSeparator"
+        "workAreaSeparator"
+        "dmPropertyCascade"
+        "designSeparator2"
+        "designSeparator1"
     )
     nil
-  )
-
-  ;Popup control for CktSync
-  lmgrCreateMenu("popup"
-    '(
-      ("mapCallback" ("csynPopup"))
     )
-  )
 
-  ; Check in/out/cancel 
-  lmgrCreateMenuItem("csynCheckOut" "simple"
+    ;Popup control for CktSync
+    lmgrCreateMenu("popup"
     '(
-      ("label" "Check Out")
-      ("callback" ("csynLMCBCheckOut" "noOpts"))
+        ("mapCallback" ("csynPopup"))
     )
-  )
+    )
 
-  lmgrCreateMenuItem("csynCheckIn" "simple"
+    ; Check in/out/cancel
+    lmgrCreateMenuItem("csynCheckOut" "simple"
     '(
-      ("label" "Check In")
-      ("callback" ("csynLMCBCheckIn" "noOpts"))
+        ("label" "Check Out")
+        ("callback" ("csynLMCBCheckOut" "noOpts"))
     )
-  )
-  lmgrCreateMenuItem("csynCancelCo" "simple"
-    '(
-      ("label" "Cancel Checkout")
-      ("callback" ("csynLMCBCancelCo" "noOpts"))
     )
-  )
 
-  lmgrInsertMenuItems("editCheckOutButton" "Vv"
+    lmgrCreateMenuItem("csynCheckIn" "simple"
+    '(
+        ("label" "Check In")
+        ("callback" ("csynLMCBCheckIn" "noOpts"))
+    )
+    )
+    lmgrCreateMenuItem("csynCancelCo" "simple"
+    '(
+        ("label" "Cancel Checkout")
+        ("callback" ("csynLMCBCancelCo" "noOpts"))
+    )
+    )
+
+    lmgrInsertMenuItems("editCheckOutButton" "Vv"
     '("csynCheckIn" "csynCheckOut" "csynCancelCo")
-  ) 
+    )
 )

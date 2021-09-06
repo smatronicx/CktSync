@@ -6,9 +6,9 @@
 ; Fail if CKTSYNC_DIR is not defined.
 ;----------------
 unless(csynSyncDir = getShellEnvVar("CKTSYNC_DIR")
-  error(
-    "Environment variable CKTSYNC_DIR is not set."
-  )
+    error(
+        "Environment variable CKTSYNC_DIR is not set."
+    )
 )
 
 csynSkillDir = strcat(csynSyncDir "/share/cds/skill/")
@@ -17,20 +17,20 @@ csynSkillDir = strcat(csynSyncDir "/share/cds/skill/")
 ; Print the program version.
 ;----------------
 procedure(csynPrintVersion()
-  let((verFile verStr lineCh)
-    verFile = infile(strcat(csynSyncDir "/version"))
-    while(gets(verStr verFile)
-      if(rexMatchp("^#" verStr) then 
-        ; Do nothing
-      else 
-	csynVersion = verStr
-      )
+    let((verFile verStr lineCh)
+        verFile = infile(strcat(csynSyncDir "/version"))
+        while(gets(verStr verFile)
+            if(rexMatchp("^#" verStr) then
+                ; Do nothing
+            else
+    csynVersion = verStr
+            )
+        )
     )
-  )
-  printf(
-    "Loading CktSync Design Manager...\nVersion %s\n"
-    csynVersion
-  )
+    printf(
+        "Loading CktSync Design Manager...\nVersion %s\n"
+        csynVersion
+    )
 )
 csynPrintVersion()
 
@@ -39,17 +39,16 @@ csynPrintVersion()
 ; Load required files.
 ;----------------
 csynSourceFiles = '(
-  "csynLM.il" "csynConnect.il" "csynCheckIn.il"
-  "csynCSV.il" "csynCheckOut.il"
+    "csynLM.il" "csynConnect.il" "csynCheckIn.il"
+    "csynCSV.il" "csynCheckOut.il"
 )
 
 procedure(csynLoadSourceFiles()
-  let((srcFile)
-    foreach(srcFile csynSourceFiles
-      load(strcat(csynSkillDir srcFile))
+    let((srcFile)
+        foreach(srcFile csynSourceFiles
+            load(strcat(csynSkillDir srcFile))
+        )
     )
-  )
 )
 
 csynLoadSourceFiles()
-

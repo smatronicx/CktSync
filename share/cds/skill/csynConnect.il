@@ -6,10 +6,10 @@
 ; Procedure to start cdsclient
 ;----------------
 procedure(csynStartClient()
-  csynClientPID = ipcBeginProcess(
-    strcat(getShellEnvVar("CKTSYNC_DIR") "/share/cds/bin/cdsclient.sh")
-    "" "" ""
-  )
+    csynClientPID = ipcBeginProcess(
+        strcat(getShellEnvVar("CKTSYNC_DIR") "/share/cds/bin/cdsclient.sh")
+        "" "" ""
+    )
 )
 csynStartClient()
 
@@ -17,13 +17,13 @@ csynStartClient()
 ; Procedure to purge pid
 ;----------------
 procedure(csynPurge(pid)
-  let((ipcReturn)
-    while(
-      (ipcReturn = ipcReadProcess(pid)) &&
-      (ipcReturn != "")
-      t
+    let((ipcReturn)
+        while(
+            (ipcReturn = ipcReadProcess(pid)) &&
+            (ipcReturn != "")
+            t
+        )
     )
-  )
 )
 
 
@@ -31,53 +31,53 @@ procedure(csynPurge(pid)
 ; Procedure to read line from pid
 ;----------------
 procedure(csynReadLine(pid @key (timeOut 30))
-  let(
-    (ipcReturn (ipcLine "") 
-      (continueRead t)
+    let(
+        (ipcReturn (ipcLine "")
+            (continueRead t)
+        )
+        while(continueRead && (ipcReturn = ipcReadProcess(pid timeOut))
+            if(ipcReturn == "" then
+                ; got blank line, break
+                continueRead = nil
+            else
+                ipcLine = strcat(ipcLine ipcReturn)
+    if(rexMatchp("\n$" ipcLine) then
+        ; got full line, break
+                    continueRead = nil
     )
-    while(continueRead && (ipcReturn = ipcReadProcess(pid timeOut))
-      if(ipcReturn == "" then
-        ; got blank line, break
-        continueRead = nil
-      else
-        ipcLine = strcat(ipcLine ipcReturn)
-	if(rexMatchp("\n$" ipcLine) then
-	  ; got full line, break
-          continueRead = nil
-	)
-      )
+            )
+        )
+        ipcLine
     )
-    ipcLine
-  )
 )
 
 ;----------------
 ; Procedure to read response to cdsclient
 ;----------------
 procedure(csynGetResponse(@key (timeOut 30))
-  let(((responseVal ""))
-    if(boundp('csynClientPID) && ipcIsActiveProcess(csynClientPID) then
-      responseVal = csynReadLine(csynClientPID ?timeOut timeOut)
-    else
-      error("CktSync Client is not running") 
+    let(((responseVal ""))
+        if(boundp('csynClientPID) && ipcIsActiveProcess(csynClientPID) then
+            responseVal = csynReadLine(csynClientPID ?timeOut timeOut)
+        else
+            error("CktSync Client is not running")
+        )
+        ; Remove trailing \n
+        responseVal = substring(responseVal 1 length(responseVal)-1)
+        responseVal
     )
-    ; Remove trailing \n
-    responseVal = substring(responseVal 1 length(responseVal)-1)
-    responseVal
-  )
 )
 
 ;----------------
 ; Procedure to send command to cdsclient
 ;----------------
-procedure(csynSendCommand(csynCmd) 
-  let(()
-    if(boundp('csynClientPID) && ipcIsActiveProcess(csynClientPID) then
-      csynCmd = strcat(csynCmd "\n")
-      csynPurge(csynClientPID)
-      ipcWriteProcess(csynClientPID csynCmd)
-    else
-      ; error("CktSync Client is not running")
+procedure(csynSendCommand(csynCmd)
+    let(()
+        if(boundp('csynClientPID) && ipcIsActiveProcess(csynClientPID) then
+            csynCmd = strcat(csynCmd "\n")
+            csynPurge(csynClientPID)
+            ipcWriteProcess(csynClientPID csynCmd)
+        else
+            ; error("CktSync Client is not running")
+        )
     )
-  )
 )
