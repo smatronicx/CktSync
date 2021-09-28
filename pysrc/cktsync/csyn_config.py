@@ -4,6 +4,7 @@
 
 from configparser import ConfigParser
 import os
+from . import csyn_constants as const
 
 class CktSyncConfig():
     # Initialize
@@ -24,6 +25,8 @@ class CktSyncConfig():
         try:
             with open(filename, 'w') as outfile:
                 self.configs.write(outfile)
+        except:
+            raise ValueError('Failed to write config file: {}.'.format(filename))
 
     # Get value from section and key
     def get(self, section, key):
@@ -42,3 +45,16 @@ class CktSyncConfig():
     # Remove section
     def remove(self, section):
         self.configs.remove_section(section)
+
+    # Get core->type
+    def GetCoreType(self):
+        dir_type = self.get(const.CONFIG_SECTION_CORE, const.CONFIG_TYPE)
+        return dir_type
+
+    # Check if core type is same as argument
+    def MatchCoreType(self, coretype):
+        dir_type = self.GetCoreType()
+        if(dir_type is not None and dir_type == coretype):
+            return True
+        else:
+            return False

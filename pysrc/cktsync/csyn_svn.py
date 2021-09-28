@@ -4,6 +4,7 @@
 
 import os
 import subprocess
+from . import csyn_util as CktSyncUtil
 
 # Class for CktSync<->svn interface
 class CktSyncSvn():
@@ -33,10 +34,17 @@ class CktSyncSvn():
         cmdout = self.CommandExec(cmd)
         return cmdout
 
+    # Add single item
+    def AddSingle(self, item):
+        cmd = self.svn_base.copy()
+        cmd.extend(['add', '--parents', '--force', '--depth=empty', item])
+        cmdout = self.CommandExec(cmd)
+        return cmdout
+
     # Remove item from svn
     def Remove(self, item):
         cmd = self.svn_base.copy()
-        cmd.extend(['rm', item])
+        cmd.extend(['rm', '--force', item])
         cmdout = self.CommandExec(cmd)
         return cmdout
 
@@ -47,11 +55,11 @@ class CktSyncSvn():
         cmdout = self.CommandExec(cmd)
         return cmdout
 
-    # Commit item to repo
-    def CommitItem(self, msg, item):
+    # Commit items to repo
+    def CommitItem(self, msg, items):
         cmd = self.svn_base.copy()
         cmd.extend(['commit', '-m', msg])
-        cmd.extend(item)
+        cmd.extend(items)
         cmdout = self.CommandExec(cmd)
         return cmdout
 

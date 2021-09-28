@@ -6,6 +6,7 @@ import os
 from .csyn_svn import CktSyncSvn
 from .csyn_config import CktSyncConfig
 from . import csyn_util as CktSyncUtil
+from . import csyn_constants as const
 import glob
 
 
@@ -15,43 +16,84 @@ class CktSyncDM():
     def __init__(self, repo, user, passwd):
         self.svnifc = CktSyncSvn(repo, user, passwd)
 
-    # Fix permission
-    def FixPermission(self):
-        pass
-
     # Check if the lib path is managed by cktsync
-    def ManagedLib(self, libpath):
-        csync_dir = os.path.join(libpath, '.csync')
-        config_file = os.path.join(csync_dir, 'config')
+    def ManagedPath(self, path, type):
+        config_file = CktSyncUtil.GetConfigPath(path)
         config = CktSyncConfig()
+        ismanaged = False
         try:
-            # Check if it is lib dir
+            # Check if it is managed path of given type
             config.Read(config_file)
-            dir_type = config.get('core', 'type')
-            if(dir_type is not None and dir_type == 'library'):
-                return True
-            else:
-                return False
+            ismanaged = config.MatchCoreType(type)
         except:
-            return False
+            ismanaged = False
+
+        return ismanaged, config
 
     # Get lib tag
     def GetLibTag(self, libpath):
-        csync_dir = os.path.join(libpath, '.csync')
-        config_file = os.path.join(csync_dir, 'config')
-        config = CktSyncConfig()
-        try:
-            # Check if it is lib tag dir
-            config.Read(config_file)
-            dir_type = config.get('core', 'type')
-            if(dir_type is None or dir_type != 'tag'):
-                return None
-        except:
+        ismanaged, config = self.ManagedPath(libpath, const.TYPE_TAG)
+        if(ismanaged == False):
             return None
 
-        tag_type = config.get('tag', 'type')
+        tag_type = config.get(const.TYPE_TAG, const.CONFIG_TYPE)
 
         return tag_type
+
+    # Get tag path
+    def GetTagPath(self, libpath, tagname):
+        try:
+            libroot = CktSyncUtil.FindTypeRoot(const.TYPE_LIB, startdir=libpath)
+        except:
+            raise ValueError('{} is not a valid library'.format(libpath))
+
+        # Get all dirs in libroot
+        dirs,_ = CktSyncUtil.ScanDir(libroot)
+        for dirname in dirs:
+            tag_type = self.GetLibTag(dirname)
+            dirname = os.path.basename(dirname)
+            if(tag_type is None):
+                # Not a valid tag
+                pass
+            elif(tag_type == tagname):
+                # Internal tag
+                return dirname
+            elif(dirname == tagname):
+                # Tagname same as dirname
+                return dirname
+
+        raise ValueError('tag {} does not exist in libroot {}'.format(tagname, libroot))
+
+    # Get all tags
+    def GetAllTags(self, libpath):
+        try:
+            libroot = CktSyncUtil.FindTypeRoot(const.TYPE_LIB, startdir=libpath)
+        except:
+            raise ValueError('{} is not a valid library'.format(libpath))
+
+        tags = []
+        # Get all dirs in libroot
+        dirs,_ = CktSyncUtil.ScanDir(libroot)
+        for dirname in dirs:
+            tag_type = self.GetLibTag(dirname)
+            if(tag_type is not None):
+                # Add tag name
+                tags.append(os.path.basename(dirname))
+
+        # Sort
+        tags.sort()
+        return tags
+
+    # Check if cell existes in a tag
+    def IsCellInTag(self, libroot, tag, cellname):
+        # Get tag path and type
+        tagpath = self.GetTagPath(libroot, tag)
+        libpath = os.path.join(libroot, tagpath)
+        tagname = self.GetLibTag(libpath)
+        cellpath = os.path.join(libpath, cellname)
+        # Check if cell is managed by cktsync
+        ismanaged, config = self.ManagedPath(cellpath, const.TYPE_CELL)
+        return ismanaged
 
     # Create cell
     def CreateCell(self, libpath, cellname):
