@@ -6,39 +6,6 @@ import os
 from .csyn_config import CktSyncConfig
 from . import csyn_constants as const
 
-# Update time stamp
-def touch(fname, times=None):
-    with open(fname, 'a'):
-        os.utime(fname, times)
-
-# Change permission for files and dir
-def ChangePermission(path, dirmode, filemode):
-    dirignore = ['.svn', '.csync']
-    for root, dirs, files in os.walk(path):
-        dirs_tmp = []
-        for item in dirs:
-            if(item not in dirignore):
-                os.chmod(os.path.join(root, item), dirmode)
-                dirs_tmp.append(item)
-        dirs[:] = dirs_tmp
-
-        for item in files:
-            os.chmod(os.path.join(root, item), filemode)
-
-# Get files and dirs into 2 lists for a path
-def ScanDir(path):
-    files = []
-    dirs = []
-    path_items = os.listdir(path)
-    for item in path_items:
-        item = os.path.join(path, item)
-        if(os.path.isfile(item)):
-            files.append(item)
-        else:
-            dirs.append(item)
-
-    return dirs, files
-
 # Get all parent directories
 def GetParentDirs(path):
     rtnpaths = []
