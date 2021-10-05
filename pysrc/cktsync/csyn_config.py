@@ -38,6 +38,12 @@ class CktSyncConfig():
             self.configs.add_section(section)
         self.configs.set(section, key, value)
 
+    # Unset a key in section
+    def unset(self, section, key):
+        if(section not in self.configs):
+            pass
+        self.configs.remove_option(section, key)
+
     # Add section
     def add(self, section):
         self.configs.add_section(section)
@@ -50,6 +56,10 @@ class CktSyncConfig():
     def GetCoreType(self):
         dir_type = self.get(const.CONFIG_SECTION_CORE, const.CONFIG_TYPE)
         return dir_type
+
+    # Set core->type
+    def SetCoreType(self, type):
+        self.set(const.CONFIG_SECTION_CORE, const.CONFIG_TYPE, type)
 
     # Check if core type is same as argument
     def MatchCoreType(self, coretype):

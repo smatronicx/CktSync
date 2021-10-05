@@ -21,9 +21,10 @@ TAG_WORK = 'work'
 TAG_LATEST = 'latest'
 TAG_OTHER = 'others'
 
-VERSION_CURRENT = 'current'
-VERSION_TYPE = 'version'
+VERSION_HEAD = 'head'
 VERSION_USER = 'user'
 VERSION_LOG = 'log'
+VERSION_LOCKED = 'locked'
+VERSION_LOCK_OWNER = 'owner'
 
 CDS_LOCK_EXT = '.cdslck'

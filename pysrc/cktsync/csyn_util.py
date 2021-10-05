@@ -5,6 +5,7 @@
 import os
 from .csyn_config import CktSyncConfig
 from . import csyn_constants as const
+from . import csyn_osutil as OsUtil
 
 # Get all parent directories
 def GetParentDirs(path):
@@ -25,6 +26,14 @@ def GetParentDirs(path):
 def GetConfigPath(path):
     csync_dir = os.path.join(path, const.CSYNCDIR)
     config_file = os.path.join(csync_dir, const.CONFIGFILE)
+    return config_file
+
+# Create empty config file in given path
+def CreateConfig(path):
+    csync_dir = os.path.join(path, const.CSYNCDIR)
+    OsUtil.mkdir(csync_dir)
+    config_file = os.path.join(csync_dir, const.CONFIGFILE)
+    OsUtil.touch(config_file)
     return config_file
 
 # Find root dir for a type
