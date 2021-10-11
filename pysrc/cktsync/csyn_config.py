@@ -21,12 +21,27 @@ class CktSyncConfig():
         self.configs.read(filename)
 
     # Write config file
-    def Write(self, filename):
+    def Write(self, filename, force=False, makero=False):
+        if(force == True):
+            # Try to change the mode to 644
+            try:
+                os.chmod(filename, 0o644)
+            except:
+                pass
+        # Write file
         try:
             with open(filename, 'w') as outfile:
                 self.configs.write(outfile)
         except:
             raise ValueError('Failed to write config file: {}.'.format(filename))
+
+        # Make it readonly
+        if(makero == True):
+            # Try to change the mode to 444
+            try:
+                os.chmod(filename, 0o444)
+            except:
+                pass
 
     # Get value from section and key
     def get(self, section, key):

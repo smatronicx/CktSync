@@ -28,3 +28,6 @@ VERSION_LOCKED = 'locked'
 VERSION_LOCK_OWNER = 'owner'
 
 CDS_LOCK_EXT = '.cdslck'
+
+SVN_LOCKOWNER = 'Lock Owner'
+SVN_WORKINGCOPY = 'working copy'

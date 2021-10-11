@@ -6,6 +6,7 @@ import os
 import subprocess
 from . import csyn_util as CktSyncUtil
 from . import csyn_osutil as OsUtil
+from . import csyn_constants as const
 
 # Class for CktSync<->svn interface
 class CktSyncSvn():
@@ -93,6 +94,13 @@ class CktSyncSvn():
         cmdout = self.CommandExec(cmd)
         return cmdout
 
+    # Check for lock owner
+    def LockOwner(self, item):
+        if(self.IsManaged(item) == False):
+            return None
+        lock_info = self.InfoDict(item)
+        return lock_info.get(const.SVN_LOCKOWNER)
+
     # Info
     def Info(self, item):
         cmd = self.svn_base.copy()
@@ -130,3 +138,14 @@ class CktSyncSvn():
 
         # Return the key-values
         return rtndict
+
+    # Check if item is under svn
+    def IsManaged(self, item):
+        try:
+            info = self.Info(item)
+            return True
+        except Exception as e:
+            err = repr(e)
+            if(const.SVN_WORKINGCOPY in err):
+                return False
+            raise ValueError(e)
