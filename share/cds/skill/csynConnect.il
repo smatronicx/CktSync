@@ -59,7 +59,7 @@ procedure(csynGetResponse(@key (timeOut 30))
         if(boundp('csynClientPID) && ipcIsActiveProcess(csynClientPID) then
             responseVal = csynReadLine(csynClientPID ?timeOut timeOut)
         else
-            error("CktSync Client is not running")
+            csynShowMessage("CktSync Client is not running")
         )
         ; Remove trailing \n
         responseVal = substring(responseVal 1 length(responseVal)-1)
@@ -77,7 +77,7 @@ procedure(csynSendCommand(csynCmd)
             csynPurge(csynClientPID)
             ipcWriteProcess(csynClientPID csynCmd)
         else
-            ; error("CktSync Client is not running")
+            csynShowMessage("CktSync Client is not running")
         )
     )
 )

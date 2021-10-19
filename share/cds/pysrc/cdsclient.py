@@ -29,7 +29,6 @@ class CDSClient():
         resp_code = resp_dict['errcode']
         resp_msg = self.CSVEscape(resp_dict['msg'] )
         resp_str = '{},{}\n'.format(resp_code, resp_msg)
-        self.UpdatePermission(cmd_dict, resp_dict)
         self.WritePacket(resp_str)
 
     # Write packet
@@ -49,14 +48,16 @@ class CDSClient():
             cmd_dict['libpath'] = pktlist[1]
             cmd_dict['cellname'] = pktlist[2]
             cmd_dict['cellview'] = pktlist[3]
-            cmd_dict['cimsg'] = pktlist[6]
-
-            # Update file permission. Does not work like chown
-            # TODO: Find a way to fix it
-            # cvpath = os.path.join(cmd_dict['libpath'], cmd_dict['cellname'], cmd_dict['cellview'])
-            # CktSyncUtil.ChangePermission(cvpath, 0o770, 0o660)
+            cmd_dict['cimsg'] = pktlist[4]
 
         if(cmd == 'cellco'):
+            # Cell checkout
+            cmd_dict['cmd'] = cmd
+            cmd_dict['libpath'] = pktlist[1]
+            cmd_dict['cellname'] = pktlist[2]
+            cmd_dict['cellview'] = pktlist[3]
+
+        if(cmd == 'cellcanco'):
             # Cell checkout
             cmd_dict['cmd'] = cmd
             cmd_dict['libpath'] = pktlist[1]
@@ -99,19 +100,6 @@ class CDSClient():
         # Escape ,
         csvstr = csvstr.replace(',', '\\,')
         return csvstr
-
-    # Update permissions
-    def UpdatePermission(self, cmd_dict, resp_dict):
-        if(resp_dict['errcode'] == 1):
-            return
-
-        if(cmd_dict['cmd'] == 'cellco'):
-            # Update file permission
-            try:
-                cvpath = os.path.join(cmd_dict['libpath'], cmd_dict['cellname'], cmd_dict['cellview'])
-                CktSyncUtil.ChangePermission(cvpath, 0o750, 0o640)
-            except:
-                pass
 
 
 CDSClient().Start()

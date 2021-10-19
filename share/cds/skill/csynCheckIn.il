@@ -43,8 +43,6 @@ procedure(csynExecCheckIn(libName cellName viewName fileName catName ciForm)
             libPath
             cellName
             viewName
-            fileName
-            catName
             ciComment
         )
         ; Build command and send to client
@@ -56,7 +54,7 @@ procedure(csynExecCheckIn(libName cellName viewName fileName catName ciForm)
         respcode = nth(0 cliresp)
         ; Check for error
         if(strcmp(respcode, "0") != 0 then
-            error(nth(1 cliresp))
+            csynShowMessage(nth(1 cliresp))
         )
         println("Checkin Done")
     )

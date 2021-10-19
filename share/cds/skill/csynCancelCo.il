@@ -3,41 +3,41 @@
 ;----------------
 
 ;----------------
-; Procedure to checkout a cellview
+; Procedure to cancel checkout of a cellview
 ;----------------
-procedure(csynLMCBCheckOut(menuName libName cellName viewName fileName catName)
+procedure(csynLMCBCancelCo(menuName libName cellName viewName fileName catName)
     let((commentField coForm)
         ; Comment for checkin
         commentField = hiCreateLabel(
             ?name 'commentField
-            ?labelText "Do you want to checkout the cell?"
+            ?labelText "Do you want to cancel checkout the cell?"
             ?justification 'center
         )
         ; Checkin form
-        coForm = hiCreateAppForm(
-            ?name 'coForm
+        cancoForm = hiCreateAppForm(
+            ?name 'cancoForm
             ?fields list(commentField)
-            ?formTitle "Check out"
+            ?formTitle "Cancel Checkout"
             ?buttonLayout 'OKCancel
-            ?callback "csynExecCheckOut(
+            ?callback "csynExecCancelCo(
                 libName cellName viewName
     fileName catName)"
         )
         ; Display form
-        hiDisplayForm(coForm)
+        hiDisplayForm(cancoForm)
     )
 )
 
 ;----------------
 ; Procedure to send checkin command to cdsclient
 ;----------------
-procedure(csynExecCheckOut(libName cellName viewName fileName catName)
+procedure(csynExecCancelCo(libName cellName viewName fileName catName)
     let((argslist clicmd
             cliresp respcode
         )
         libPath = ddGetObj(libName)~>readPath
         arglist = list(
-            "cellco"
+            "cellcanco"
             libPath
             cellName
             viewName
@@ -53,6 +53,6 @@ procedure(csynExecCheckOut(libName cellName viewName fileName catName)
         if(strcmp(respcode, "0") != 0 then
             csynShowMessage(nth(1 cliresp))
         )
-        println("Checkout Done")
+        println("Checkout Cancelled")
     )
 )

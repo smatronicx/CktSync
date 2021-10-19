@@ -59,6 +59,8 @@ class CktSyncDM(CktSyncDMBase):
         if(firstci == False):
             hist_file = self.UnlockCellview(libpath_latest, cellname, cellview, user)
         self.SVNAddCellview(libroot, cellname, cellview, const.TAG_LATEST)
+        # Update cell in work tag
+        self.UpdateCellview(libroot, cellname, cellview, const.TAG_WORK)
 
     # Checkin Cellview. Cells can be checkout only from work tag
     def CoCellview(self, user, libpath, cellname, cellview):
@@ -88,3 +90,39 @@ class CktSyncDM(CktSyncDMBase):
 
         # Lock cellview
         self.LockCellview(libpath_latest, cellname, cellview, user)
+        # Empty the cellview in worktag
+        self.EmptyCellview(libroot, cellname, cellview, const.TAG_WORK)
+
+    # Cancel checkout of Cellview. Cells can be cancelled only from work tag
+    def CancelCoCellview(self, user, libpath, cellname, cellview):
+        # Check for work tag
+        libroot = CktSyncUtil.FindTypeRoot(const.TYPE_LIB, startdir=libpath)
+        tagname = self.GetLibTag(libpath)
+
+        if(tagname != const.TAG_WORK):
+            raise ValueError('{} is not in work tag'.format(libpath))
+
+        # Check if cell and cellview are present in latest
+        tagpath = self.GetTagPath(libroot, const.TAG_LATEST)
+        libpath_latest = os.path.join(libroot, tagpath)
+        ismanaged = self.IsCellInTag(libroot, const.TAG_LATEST, cellname)
+        if(ismanaged == False):
+            raise ValueError('{} is not managed'.format(cellname))
+
+        ismanaged  = self.IsCellviewInTag(libroot, const.TAG_LATEST, cellname, cellview)
+        if(ismanaged == False):
+            raise ValueError('{}->{} is not managed'.format(cellname, cellview))
+
+        else:
+            # Check if the cell is checkedout by user
+            owner = self.GetCellviewLockOwner(libpath_latest, cellname, cellview)
+            if(owner is None):
+                raise ValueError('{}->{} is not checkedout'.format(cellname, cellview))
+            if(owner != user):
+                raise ValueError('{}->{} is locked by {}'.format(cellname, cellview, owner,user))
+
+        # Unlock
+        hist_file = self.UnlockCellview(libpath_latest, cellname, cellview, user)
+        self.svnifc.Unlock(hist_file)
+        # Update cell in work tag
+        self.UpdateCellview(libroot, cellname, cellview, const.TAG_WORK)

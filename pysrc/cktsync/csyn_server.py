@@ -38,7 +38,11 @@ class CktSyncServer():
         csynserver = Listener(server_address)
         while(True):
             csynclient = csynserver.accept()
-            cmd_dict = csynclient.recv()
+            try:
+                cmd_dict = csynclient.recv()
+            except:
+                continue
+
             try:
                 resp_dict = self.ParseCommand(cmd_dict)
             except Exception as e:
@@ -78,6 +82,15 @@ class CktSyncServer():
             cktdm.CoCellview(user, libpath, cellname, cellview)
             resp_dict['errcode']=0
             resp_dict['msg'] = 'Checkout successful'
+
+        elif(cmd_dict['cmd'] == 'cellcanco'):
+            # Cancel cell checkout
+            libpath = cmd_dict['libpath']
+            cellname = cmd_dict['cellname']
+            cellview = cmd_dict['cellview']
+            cktdm.CancelCoCellview(user, libpath, cellname, cellview)
+            resp_dict['errcode']=0
+            resp_dict['msg'] = 'Checkout cancelled'
 
         return resp_dict
 

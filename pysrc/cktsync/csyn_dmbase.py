@@ -166,7 +166,7 @@ class CktSyncDMBase():
             raise ValueError('Failed to add {}->{}->{} to svn'.format(libroot, tag, cellname))
 
     # Copy cellview from one tag to another
-    def CopyCellview(self, libroot, cellname, cellview, srctag, dsttag):
+    def CopyCellview(self, libroot, cellname, cellview, srctag, dsttag, copycell=True):
         # Get tag path and type
         tagpath = self.GetTagPath(libroot, srctag)
         srclibpath = os.path.join(libroot, tagpath)
@@ -176,7 +176,8 @@ class CktSyncDMBase():
         dstcellpath = os.path.join(dstlibpath, cellname)
 
         # Copy cell first
-        self.CopyCell(libroot, cellname, srctag, dsttag)
+        if(copycell == True):
+            self.CopyCell(libroot, cellname, srctag, dsttag)
 
         # Check if cellview exists and managed
         ismanaged = self.IsCellviewInTag(libroot, srctag, cellname, cellview)
@@ -346,3 +347,74 @@ class CktSyncDMBase():
 
         except:
             raise ValueError('Failed to get owner of {}->{}'.format(cellname, cellview))
+
+    # Remove content of cell from tag
+    def EmptyCell(self, libroot, cellname, tag):
+        # Get tag path and type
+        tagpath = self.GetTagPath(libroot, tag)
+        libpath = os.path.join(libroot, tagpath)
+        cellpath = os.path.join(libpath, cellname)
+        try:
+            OsUtil.EmptyDir(cellpath)
+        except:
+            raise ValueError('Failed to empty cell {} in {}'.format(cellname, tag))
+
+    # Remove content of cell from tag
+    def EmptyCellview(self, libroot, cellname, cellview, tag):
+        # Get tag path and type
+        tagpath = self.GetTagPath(libroot, tag)
+        libpath = os.path.join(libroot, tagpath)
+        cvpath = os.path.join(libpath, cellname, cellview)
+        try:
+            OsUtil.EmptyDir(cvpath)
+        except:
+            raise ValueError('Failed to empty cellview {}->{} in {}'.format(cellname, cellview, tag))
+
+    # Update cell in tag
+    def UpdateCell(self, libroot, cellname, tag):
+        # Get tag path and type
+        tagpath = self.GetTagPath(libroot, tag)
+        libpath = os.path.join(libroot, tagpath)
+        tagname = self.GetLibTag(libpath)
+        cellpath = os.path.join(libpath, cellname)
+        if(tagname == const.TAG_WORK):
+            # Update latest tag
+            self.UpdateCell(libroot, cellname, const.TAG_LATEST)
+            # Copy files in work tag
+            try:
+                self.CopyCell(libroot, cellname, const.TAG_LATEST, const.TAG_WORK)
+            except:
+                raise ValueError('Failed to update cell {} in {}'.format(cellname, tag))
+        else:
+            # Update the svn path for cell
+            try:
+                self.svnifc.Update(cellpath)
+            except:
+                raise ValueError('Failed to update cell {} in {}'.format(cellname, tag))
+
+    # Update cellview in a tag
+    def UpdateCellview(self, libroot, cellname, cellview, tag):
+        # Get tag path and type
+        tagpath = self.GetTagPath(libroot, tag)
+        libpath = os.path.join(libroot, tagpath)
+        tagname = self.GetLibTag(libpath)
+        cvpath = os.path.join(libpath, cellname, cellview)
+        if(tagname == const.TAG_WORK):
+            tagpath = self.GetTagPath(libroot, const.TAG_LATEST)
+            libpath_latest = os.path.join(libroot, tagpath)
+            srccvpath = os.path.join(libpath_latest, cellname, cellview)
+            owner = self.GetCellviewLockOwner(libpath_latest, cellname, cellview)
+            if(owner is not None):
+                raise ValueError('{}->{} is locked by {}'.format(cellname, cellview, owner))
+
+            # Link cellview in work tag
+            try:
+                OsUtil.mkdir(cvpath)
+                self.EmptyCellview(libroot, cellname, cellview, tag)
+                OsUtil.CreatePathLink(srccvpath, cvpath, ignorelist=['.svn'],relpath=True)
+
+            except:
+                raise ValueError('Failed to update cellview {}->{} in {}'.format(cellname, cellview, tag))
+        else:
+            # Update the svn path for cell
+            self.UpdateCell(libroot, cellname, tag)

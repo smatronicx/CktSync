@@ -53,7 +53,7 @@ when(getShellEnvVar("CKTSYNC_DIR")
         )
     )
 
-    lmgrInsertMenuItems("editCheckOutButton" "Vv"
+    lmgrInsertMenuItems("editCheckOutButton" "V"
         '("csynCheckIn" "csynCheckOut" "csynCancelCo")
     )
 )

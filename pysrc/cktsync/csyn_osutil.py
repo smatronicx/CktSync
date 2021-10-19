@@ -48,7 +48,7 @@ def CopyDirectory(srcpath, dstpath, copylink=False, overwrite=True, ignorelist=[
     mkdir(dstpath, mode=0o750)
     if(overwrite == True):
         os.chmod(dstpath, 0o750)
-        
+
     CopyFiles(srcpath, dstpath, copylink=copylink, overwrite=overwrite)
     dirs,_ = ScanDir(srcpath)
     for srcdirpath in dirs:
@@ -111,10 +111,96 @@ def ChangeFilePermission(path, filemode=0o640):
 
     for item in files:
         try:
-            os.chmod(os.path.join(path, item), filemode)
+            os.chmod(item, filemode)
         except:
             failed_paths.append(os.path.join(path, item))
 
     # Raise error
     if(len(failed_paths) != 0):
         raise ValueError('Failed to change permission for {}'.format(failed_paths))
+
+# Link all files and dirs in from srcpath to dstpath
+def CreatePathLink(srcpath, dstpath, ignorelist=[], relpath=False):
+    failed_paths = []
+    dirs, files = ScanDir(srcpath)
+    files.extend(dirs)
+    for srcfilepath in files:
+        filename = os.path.basename(srcfilepath)
+        dstfilepath = os.path.join(dstpath, filename)
+        exists = os.path.exists(dstfilepath)
+        # Check if we should create link to the file in dstpath
+        createlink = True
+        if(exists == True):
+            createlink = False
+            failed_paths.append(srcfilepath)
+
+        if(createlink == True):
+            if(filename not in ignorelist):
+                try:
+                    if(relpath == True):
+                        srcfilepath = os.path.relpath(srcfilepath, dstpath)
+                    os.symlink(srcfilepath, dstfilepath)
+                except:
+                    failed_paths.append(srcfilepath)
+
+    # Raise error
+    if(len(failed_paths) != 0):
+        raise ValueError('Failed to create links for {}'.format(failed_paths))
+
+# Remove links from path
+def RemovePathLink(path, ignorelist=[]):
+    failed_paths = []
+    dirs, files = ScanDir(path)
+    files.extend(dirs)
+    for filepath in files:
+        filename = os.path.basename(filepath)
+        if(filename not in ignorelist):
+            islink = os.path.islink(filepath)
+            if(islink == True):
+                try:
+                    os.unlink(filepath)
+                except:
+                    failed_paths.append(filepath)
+
+    # Raise error
+    if(len(failed_paths) != 0):
+        raise ValueError('Failed to create links for {}'.format(failed_paths))
+
+# Remove directory
+def DeleteDir(path, keeproot=False):
+    failed_paths = []
+    # Remove links
+    try:
+        RemovePathLink(path)
+    except:
+        failed_paths.append(path)
+
+    dirs, files = ScanDir(path)
+    # Remove dirs
+    for item in dirs:
+        try:
+            DeleteDir(item)
+        except:
+            failed_paths.append(item)
+
+    # Remove files
+    for item in files:
+        try:
+            os.remove(item)
+        except:
+            failed_paths.append(item)
+
+    # Remove Path
+    if(keeproot == False):
+        try:
+            os.rmdir(path)
+        except:
+            failed_paths.append(path)
+
+    # Raise error
+    if(len(failed_paths) != 0):
+        raise ValueError('Failed to change permission for {}'.format(failed_paths))
+
+# Remove content of directory
+def EmptyDir(path):
+    DeleteDir(path, keeproot=True)

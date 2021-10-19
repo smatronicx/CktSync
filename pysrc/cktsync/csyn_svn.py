@@ -116,9 +116,9 @@ class CktSyncSvn():
         return cmdout
 
     # Update
-    def Update(self):
+    def Update(self, item):
         cmd = self.svn_base.copy()
-        cmd.extend(['update'])
+        cmd.extend(['update', item])
         cmdout = self.CommandExec(cmd)
         return cmdout
 

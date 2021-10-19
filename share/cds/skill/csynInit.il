@@ -39,8 +39,9 @@ csynPrintVersion()
 ; Load required files.
 ;----------------
 csynSourceFiles = '(
-    "csynLM.il" "csynConnect.il" "csynCheckIn.il"
-    "csynCSV.il" "csynCheckOut.il"
+    "csynUtil.il"
+    "csynLM.il" "csynConnect.il" "csynCSV.il"
+    "csynCheckIn.il" "csynCheckOut.il" "csynCancelCo.il"
 )
 
 procedure(csynLoadSourceFiles()
