@@ -55,7 +55,8 @@ procedure(csynExecCheckIn(libName cellName viewName fileName catName ciForm)
         ; Check for error
         if(strcmp(respcode, "0") != 0 then
             csynShowMessage(nth(1 cliresp))
+        else
+            println("Checkin Done")
         )
-        println("Checkin Done")
     )
 )

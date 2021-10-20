@@ -56,4 +56,42 @@ when(getShellEnvVar("CKTSYNC_DIR")
     lmgrInsertMenuItems("editCheckOutButton" "V"
         '("csynCheckIn" "csynCheckOut" "csynCancelCo")
     )
+
+    ; Update
+    lmgrCreateMenuItem("csynUpdateLib" "simple"
+        '(
+            ("label" "Update")
+            ("callback" ("csynLMCBUpdate" "noOpts"))
+        )
+    )
+
+    lmgrInsertMenuItems("editCheckOutButton" "LCV"
+        '("csynUpdateLib")
+    )
+
+    ; Tag
+    ; lmgrCreateMenuItem("csynTagLib" "simple"
+    ;     '(
+    ;         ("label" "Tag Library")
+    ;         ("callback" ("csynLMCBCheckIn" "noOpts"))
+    ;     )
+    ; )
+    ;
+    ; lmgrCreateMenuItem("csynTagCell" "simple"
+    ;     '(
+    ;         ("label" "Tag Cellviews")
+    ;         ("callback" ("csynLMCBCheckIn" "noOpts"))
+    ;     )
+    ; )
+    ;
+    ; lmgrCreateMenuItem("csynTagCellview" "simple"
+    ;     '(
+    ;         ("label" "Tag Cellview")
+    ;         ("callback" ("csynLMCBCheckIn" "noOpts"))
+    ;     )
+    ; )
+    ;
+    ; lmgrInsertMenuItems("editCheckOutButton" "L"
+    ;     '("csynTagLib")
+    ; )
 )

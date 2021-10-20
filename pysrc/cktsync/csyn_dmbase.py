@@ -107,6 +107,44 @@ class CktSyncDMBase():
         ismanaged, config = self.ManagedPath(cellviewpath, const.TYPE_CELLVIEW)
         return ismanaged
 
+    # Copy library files from one tag to another
+    def CopyLibFiles(self, libroot, srctag, dsttag):
+        # Get tag path and type
+        tagpath = self.GetTagPath(libroot, srctag)
+        srclibpath = os.path.join(libroot, tagpath)
+        tagpath = self.GetTagPath(libroot, dsttag)
+        dstlibpath = os.path.join(libroot, tagpath)
+
+        # Copy
+        try:
+            # copy all files to new cell
+            OsUtil.CopyFiles(srclibpath, dstlibpath, copylink=False, overwrite=True)
+
+        except:
+            raise ValueError('Failed to copy {} to {}'.format(srctag, dsttag))
+
+        # Fix file permissions
+        try:
+            OsUtil.ChangeFilePermission(dstlibpath, filemode=0o440)
+        except:
+            raise ValueError('Failed to copy {} to {}'.format(srctag, dsttag))
+
+    # Add cell to svn in a tag
+    def SVNAddLibFiles(self, libroot, tag):
+        # Get tag path and type
+        tagpath = self.GetTagPath(libroot, tag)
+        libpath = os.path.join(libroot, tagpath)
+
+        # Add files
+        try:
+            _,files = OsUtil.ScanDir(libpath)
+            for item in files:
+                self.svnifc.Add(item)
+            msg = 'Added {}->{}'.format(libroot, tag)
+            self.svnifc.CommitItem(msg, files)
+        except:
+            raise ValueError('Failed to add {}->{} to svn'.format(libroot, tag))
+
     # Copy cell from one tag to another
     def CopyCell(self, libroot, cellname, srctag, dsttag):
         # Get tag path and type
@@ -124,6 +162,7 @@ class CktSyncDMBase():
 
         # Create cell and copy
         try:
+            self.CopyLibFiles(libroot, srctag, dsttag)
             # Create cell in totag
             OsUtil.mkdir(dstcellpath, mode=0o750)
             # copy all files to new cell
@@ -151,6 +190,8 @@ class CktSyncDMBase():
         cellpath = os.path.join(libpath, cellname)
         csyncpath = os.path.join(cellpath, const.CSYNCDIR)
 
+        # Add lib files
+        self.SVNAddLibFiles(libroot, tag)
         # Add cell, files and CSYNCDIR
         try:
             self.svnifc.AddSingle(cellpath)
@@ -370,6 +411,51 @@ class CktSyncDMBase():
         except:
             raise ValueError('Failed to empty cellview {}->{} in {}'.format(cellname, cellview, tag))
 
+    # Update tag
+    def UpdateTag(self, libroot, tag):
+        # Get tag path and type
+        tagpath = self.GetTagPath(libroot, tag)
+        libpath = os.path.join(libroot, tagpath)
+        tagname = self.GetLibTag(libpath)
+        if(tagname == const.TAG_WORK):
+            # Update latest tag
+            self.UpdateTag(libroot, const.TAG_LATEST)
+            tagpath = self.GetTagPath(libroot, const.TAG_LATEST)
+            libpath_latest = os.path.join(libroot, tagpath)
+            # Copy all files to worktag
+            try:
+                OsUtil.CopyFiles(libpath_latest, libpath)
+            except:
+                pass
+
+            # Get all cells and update them in worktag
+            dirs, _ = OsUtil.ScanDir(libpath_latest)
+            for cellpath in dirs:
+                cellname = os.path.basename(cellpath)
+                try:
+                    self.UpdateCell(libroot, cellname, const.TAG_WORK)
+                except:
+                    pass
+        else:
+            # Fix file permissions
+            try:
+                OsUtil.ChangePermission(libpath, dirmode=0o750, filemode=0o640)
+            except:
+                raise ValueError('Failed to update tag {}'.format(tag))
+
+            # Update the svn path
+            try:
+                self.svnifc.Update(libpath)
+            except:
+                raise ValueError('Failed to update tag {}'.format(tag))
+
+            # Fix file permissions
+            try:
+                OsUtil.ChangePermission(libpath, dirmode=0o750, filemode=0o440)
+            except:
+                raise ValueError('Failed to update tag {}'.format(tag))
+
+
     # Update cell in tag
     def UpdateCell(self, libroot, cellname, tag):
         # Get tag path and type
@@ -385,10 +471,33 @@ class CktSyncDMBase():
                 self.CopyCell(libroot, cellname, const.TAG_LATEST, const.TAG_WORK)
             except:
                 raise ValueError('Failed to update cell {} in {}'.format(cellname, tag))
+
+            # Get all cells and update them in worktag
+            tagpath = self.GetTagPath(libroot, const.TAG_LATEST)
+            cellpath_latest = os.path.join(libroot, tagpath, cellname)
+            dirs, _ = OsUtil.ScanDir(cellpath_latest)
+            for cvpath in dirs:
+                cellview = os.path.basename(cvpath)
+                try:
+                    self.UpdateCellview(libroot, cellname, cellview, const.TAG_WORK)
+                except:
+                    pass
         else:
+            # Fix file permissions
+            try:
+                OsUtil.ChangePermission(cellpath, dirmode=0o750, filemode=0o640)
+            except:
+                raise ValueError('Failed to update cell {} in {}'.format(cellname, tag))
+
             # Update the svn path for cell
             try:
                 self.svnifc.Update(cellpath)
+            except:
+                raise ValueError('Failed to update cell {} in {}'.format(cellname, tag))
+
+            # Fix file permissions
+            try:
+                OsUtil.ChangePermission(cellpath, dirmode=0o750, filemode=0o440)
             except:
                 raise ValueError('Failed to update cell {} in {}'.format(cellname, tag))
 
@@ -416,5 +525,20 @@ class CktSyncDMBase():
             except:
                 raise ValueError('Failed to update cellview {}->{} in {}'.format(cellname, cellview, tag))
         else:
-            # Update the svn path for cell
-            self.UpdateCell(libroot, cellname, tag)
+            # Fix file permissions
+            try:
+                OsUtil.ChangePermission(cvpath, dirmode=0o750, filemode=0o640)
+            except:
+                raise ValueError('Failed to update cellview {}->{} in {}'.format(cellname, cellview, tag))
+
+            # Update the svn path for cellview
+            try:
+                self.svnifc.Update(cvpath)
+            except:
+                raise ValueError('Failed to update cellview {}->{} in {}'.format(cellname, cellview, tag))
+
+            # Fix file permissions
+            try:
+                OsUtil.ChangePermission(cvpath, dirmode=0o750, filemode=0o440)
+            except:
+                raise ValueError('Failed to update cellview {}->{} in {}'.format(cellname, cellview, tag))

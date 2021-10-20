@@ -86,12 +86,8 @@ class CktSyncClient():
             except:
                 raise ValueError('Fail to change permission {}->{}'.format(cmd['cellname'], cmd['cellview']))
 
-        # Check out
-        if(cmd['cmd'] == 'cellco'):
-            pass
-
         # Cancel check out
-        if(cmd['cmd'] == 'cellcanco'):
+        elif(cmd['cmd'] == 'cellcanco'):
             cellpath = os.path.join(cmd['libpath'], cmd['cellname'])
             cvpath = os.path.join(cellpath, cmd['cellview'])
             # Try to change file permission
@@ -112,12 +108,8 @@ class CktSyncClient():
         if(resp_dict['errcode'] == 1):
             return
 
-        # Check in
-        if(cmd['cmd'] == 'cellci'):
-            pass
-
         # Check out
-        if(cmd['cmd'] == 'cellco'):
+        elif(cmd['cmd'] == 'cellco'):
             cktdm = CktSyncDM('', '', '')
             libpath = cmd['libpath']
             cellname = cmd['cellname']

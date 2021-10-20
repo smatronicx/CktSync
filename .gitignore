@@ -1,3 +1,4 @@
 # Python related file
 __pycache__/
 *.py[cod]
+csyn_testcase.py

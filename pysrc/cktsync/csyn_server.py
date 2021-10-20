@@ -92,6 +92,15 @@ class CktSyncServer():
             resp_dict['errcode']=0
             resp_dict['msg'] = 'Checkout cancelled'
 
+        elif(cmd_dict['cmd'] == 'update'):
+            # Cancel cell checkout
+            libpath = cmd_dict['libpath']
+            cellname = cmd_dict['cellname']
+            cellview = cmd_dict['cellview']
+            cktdm.UpdateLibContent(libpath, cellname, cellview)
+            resp_dict['errcode']=0
+            resp_dict['msg'] = 'Update done'
+
         return resp_dict
 
     # Arg parser

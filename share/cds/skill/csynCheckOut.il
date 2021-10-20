@@ -52,7 +52,8 @@ procedure(csynExecCheckOut(libName cellName viewName fileName catName)
         ; Check for error
         if(strcmp(respcode, "0") != 0 then
             csynShowMessage(nth(1 cliresp))
+        else
+            println("Checkout Done")
         )
-        println("Checkout Done")
     )
 )

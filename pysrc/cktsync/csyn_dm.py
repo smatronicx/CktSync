@@ -126,3 +126,18 @@ class CktSyncDM(CktSyncDMBase):
         self.svnifc.Unlock(hist_file)
         # Update cell in work tag
         self.UpdateCellview(libroot, cellname, cellview, const.TAG_WORK)
+
+    # Update Lib contents
+    def UpdateLibContent(self, libpath, cellname, cellview):
+        libroot = CktSyncUtil.FindTypeRoot(const.TYPE_LIB, startdir=libpath)
+        tagname = self.GetLibTag(libpath)
+
+        if(cellview != ''):
+            # Update cellview
+            self.UpdateCellview(libroot, cellname, cellview, tagname)
+        elif(cellname != ''):
+            # Update cell
+            self.UpdateCell(libroot, cellname, tagname)
+        else:
+            # Update lib
+            self.UpdateTag(libroot, tagname)

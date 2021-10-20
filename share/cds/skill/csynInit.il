@@ -42,6 +42,7 @@ csynSourceFiles = '(
     "csynUtil.il"
     "csynLM.il" "csynConnect.il" "csynCSV.il"
     "csynCheckIn.il" "csynCheckOut.il" "csynCancelCo.il"
+    "csynUpdate.il"
 )
 
 procedure(csynLoadSourceFiles()

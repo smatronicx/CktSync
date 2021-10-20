@@ -64,6 +64,13 @@ class CDSClient():
             cmd_dict['cellname'] = pktlist[2]
             cmd_dict['cellview'] = pktlist[3]
 
+        if(cmd == 'update'):
+            # Update
+            cmd_dict['cmd'] = cmd
+            cmd_dict['libpath'] = pktlist[1]
+            cmd_dict['cellname'] = pktlist[2]
+            cmd_dict['cellview'] = pktlist[3]
+
         return cmd_dict
 
     # CSV to list
