@@ -4,6 +4,10 @@
 
 import os
 import shutil
+import stat
+import grp
+import pwd
+import platform
 from . import csyn_constants as const
 
 # Update time stamp
@@ -204,3 +208,106 @@ def DeleteDir(path, keeproot=False):
 # Remove content of directory
 def EmptyDir(path):
     DeleteDir(path, keeproot=True)
+
+# Get path owner and group
+def GetPathOwners(path):
+    path_stat = os.stat(path)
+    itemdict = {}
+    itemdict["uid"] = path_stat.st_uid
+    itemdict["gid"] = path_stat.st_gid
+    itemdict["owner"] = pwd.getpwuid(itemdict["uid"])[0]
+    itemdict["group"] = grp.getgrgid(itemdict["gid"])[0]
+    return itemdict
+
+# Get path stat
+def GetPathStat(path):
+    path_stat = os.stat(path)
+    itemdict = {}
+    itemdict["path"] = path
+    if(os.path.isdir(path)):
+        itemdict["type"] = "dir"
+    elif(os.path.islink(path)):
+        itemdict["type"] = "link"
+    elif(os.path.isfile(path)):
+        itemdict["type"] = "file"
+    else:
+        itemdict["type"] = None
+    itemdict["uid"] = path_stat.st_uid
+    itemdict["gid"] = path_stat.st_gid
+    itemdict["owner"] = pwd.getpwuid(itemdict["uid"])[0]
+    itemdict["group"] = grp.getgrgid(itemdict["gid"])[0]
+    stat_per_const = ['S_IRUSR', 'S_IWUSR', 'S_IXUSR',
+        'S_IRGRP', 'S_IWGRP', 'S_IXGRP', 'S_IROTH', 'S_IWOTH', 'S_IXOTH']
+    for stat_per in stat_per_const:
+        stat_key = stat_per[3:].lower()
+        if(path_stat.st_mode & getattr(stat, stat_per)):
+            itemdict[stat_key] = True
+        else:
+            itemdict[stat_key] = False
+
+    return itemdict
+
+# Get Information about files and dirs
+def GetDirInfo(path, recursive=False):
+    infolist = []
+    itemdict = GetPathStat(path)
+    infolist.append(itemdict)
+    try:
+        dirs, files = ScanDir(path)
+        for item in files:
+            itemdict = GetPathStat(item)
+            infolist.append(itemdict)
+        for item in dirs:
+            if(recursive == True):
+                infolist_item = GetDirInfo(item, recursive=True)
+                infolist.extend(infolist_item)
+            else:
+                itemdict = GetPathStat(item)
+                infolist.append(itemdict)
+    except:
+        pass
+    return infolist
+
+# Check for read/write permission
+def CheckPermission(pathinfo, user, groups=[]):
+    # Sting path. Get stat and then check
+    if(isinstance(pathinfo, str) == True):
+        pathinfo = GetPathStat(pathinfo)
+
+    readperm = False
+    writeperm = False
+    if(pathinfo["type"] == "dir"):
+        # For dir r and x required for read
+        if(pathinfo["owner"] == user):
+            #check for user
+            readperm = pathinfo["rusr"] and pathinfo["xusr"]
+            writeperm = readperm and pathinfo["wusr"]
+        elif(pathinfo["group"] in groups):
+            # check for group
+            readperm = pathinfo["rgrp"] and pathinfo["xgrp"]
+            writeperm = readperm and pathinfo["wgrp"]
+        else:
+            # check for others
+            readperm = pathinfo["roth"] and pathinfo["xoth"]
+            writeperm = readperm and pathinfo["woth"]
+
+    if(pathinfo["type"] == "file" or pathinfo["type"] == "link"):
+        if(pathinfo["owner"] == user):
+            #check for user
+            readperm = pathinfo["rusr"]
+            writeperm = readperm and pathinfo["wusr"]
+        elif(pathinfo["group"] in groups):
+            # check for group
+            readperm = pathinfo["rgrp"]
+            writeperm = readperm and pathinfo["wgrp"]
+        else:
+            # check for others
+            readperm = pathinfo["roth"]
+            writeperm = readperm and pathinfo["woth"]
+
+    if(writeperm == True):
+        return const.PATH_WRITE_PERMISSION
+    elif(readperm ==  True):
+        return const.PATH_READ_PERMISSION
+
+    return const.PATH_NO_PERMISSION

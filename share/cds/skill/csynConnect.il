@@ -32,8 +32,8 @@ procedure(csynPurge(pid)
 ;----------------
 procedure(csynReadLine(pid @key (timeOut 30))
     let(
-        (ipcReturn (ipcLine "")
-            (continueRead t)
+        (
+            ipcReturn (ipcLine "") (continueRead t)
         )
         while(continueRead && (ipcReturn = ipcReadProcess(pid timeOut))
             if(ipcReturn == "" then
@@ -41,10 +41,10 @@ procedure(csynReadLine(pid @key (timeOut 30))
                 continueRead = nil
             else
                 ipcLine = strcat(ipcLine ipcReturn)
-    if(rexMatchp("\n$" ipcLine) then
-        ; got full line, break
+                if(rexMatchp("\n$" ipcLine) then
+                    ; got full line, break
                     continueRead = nil
-    )
+                )
             )
         )
         ipcLine

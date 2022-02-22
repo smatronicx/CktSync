@@ -39,7 +39,7 @@ csynPrintVersion()
 ; Load required files.
 ;----------------
 csynSourceFiles = '(
-    "csynUtil.il"
+    "csynUtil.il" "csynJSON.il"
     "csynLM.il" "csynConnect.il" "csynCSV.il"
     "csynCheckIn.il" "csynCheckOut.il" "csynCancelCo.il"
     "csynUpdate.il"
@@ -54,3 +54,5 @@ procedure(csynLoadSourceFiles()
 )
 
 csynLoadSourceFiles()
+
+csynJSONParse("M")

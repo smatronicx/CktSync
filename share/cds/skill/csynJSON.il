@@ -365,6 +365,20 @@ procedure(csynJSONWriteObject(jsonobj)
     )
 )
 
+procedure(csynJSONWriteNumber(jsonobj)
+    let(((jsonstr ""))
+        cond(
+            ((null !integerp(jsonobj))
+                sprintf(jsonstr, "%d", jsonobj)
+            )
+            ((null !realp(jsonobj))
+                sprintf(jsonstr, "%g", jsonobj)
+            )
+        )
+        jsonstr
+    )
+)
+
 procedure(csynJSONtoString(jsonobj)
     let(((objtype nil) (jsonstr ""))
         cond(
@@ -379,6 +393,21 @@ procedure(csynJSONtoString(jsonobj)
             ; String
             ((null !stringp(jsonobj))
                 sprintf(jsonstr "\"%s\"" jsonobj)
+            )
+            ; Number
+            ((null !integerp(jsonobj))
+                jsonstr = csynJSONWriteNumber(jsonobj)
+            )
+            ((null !realp(jsonobj))
+                jsonstr = csynJSONWriteNumber(jsonobj)
+            )
+            ; True
+            ((null !jsonobj)
+                jsonstr = "true"
+            )
+            ; False
+            ((null jsonobj)
+                jsonstr = "false"
             )
         )
         jsonstr

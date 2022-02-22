@@ -34,6 +34,7 @@ procedure(csynLMCBCheckIn(menuName libName cellName viewName fileName catName)
 ;----------------
 procedure(csynExecCheckIn(libName cellName viewName fileName catName ciForm)
     let((argslist clicmd
+            dbcell
             cliresp ciComment respcode
         )
         ciComment = hiEscapeStringChars(ciForm->commentField->value)
@@ -45,6 +46,16 @@ procedure(csynExecCheckIn(libName cellName viewName fileName catName ciForm)
             viewName
             ciComment
         )
+        ; Save db
+        dbcell = dbFindOpenCellViewByName(libName cellName viewName)
+        if((dbcell) then
+            if(dbIsCellViewModified(dbcell)
+                println("do something")
+                ;dbSave(dbcell)
+                ;dbReopen(dbcell "r")
+            )
+        )
+
         ; Build command and send to client
         clicmd = csynCSVList2String(arglist)
         csynSendCommand(clicmd)

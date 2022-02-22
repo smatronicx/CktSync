@@ -3,18 +3,19 @@
 #----------------
 
 import os
+import getpass
 from .csyn_svn import CktSyncSvn
 from .csyn_config import CktSyncConfig
 from . import csyn_util as CktSyncUtil
 from . import csyn_osutil as OsUtil
 from . import csyn_constants as const
-import glob
 
 
 # Class for CktSync design management interface
 class CktSyncDMBase():
     # Initialize
     def __init__(self, repo, user, passwd):
+        self.username = getpass.getuser()
         self.svnifc = CktSyncSvn(repo, user, passwd)
 
     # Check if the lib path is managed by cktsync
@@ -106,6 +107,34 @@ class CktSyncDMBase():
         # Check if cell is managed by cktsync
         ismanaged, config = self.ManagedPath(cellviewpath, const.TYPE_CELLVIEW)
         return ismanaged
+
+    # Check for access permission
+    def CheckAccessPermission(self, libroot, path, accesstype, recursive=False):
+        rootinfo = OsUtil.GetPathOwners(libroot)
+        pathinfo =  OsUtil.GetDirInfo(path, recursive=recursive)
+        rootgroup = rootinfo["group"]
+        different_group = []
+        different_permission = []
+        for item in pathinfo:
+            # Check for group type
+            if(item["group"] != rootgroup):
+                # Try to fix group if we own the path
+                if(item["owner"] == self.username):
+                    try:
+                        os.chown(item["path"], -1, rootinfo["gid"])
+                    except:
+                        different_group.append(item)
+                else:
+                    different_group.append(item)
+
+            # Check for permission
+            pathperm = OsUtil.CheckPermission(item, self.username, [rootgroup])
+            if((pathperm & accesstype) != accesstype):
+                different_permission.append(item)
+
+        return (different_permission, different_group)
+
+
 
     # Copy library files from one tag to another
     def CopyLibFiles(self, libroot, srctag, dsttag):
